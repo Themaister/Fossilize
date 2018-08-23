@@ -458,6 +458,7 @@ static void print_help()
 	     "\t[--enable-validation]\n"
 	     "\t[--graphics-pipeline <index>]\n"
 	     "\t[--compute-pipeline <index>]\n"
+	     "\t[--spirv-module <index>]\n"
 	     "\t[--stage vert/frag/comp/geom/tesc/tese]\n"
 	     "\t[--output <path>]\n"
 	     "\t[--target asm/glsl/amd]\n"
@@ -474,6 +475,7 @@ int main(int argc, char *argv[])
 
 	int graphics_index = -1;
 	int compute_index = -1;
+	int spirv_index = -1;
 
 	CLICallbacks cbs;
 	cbs.default_handler = [&](const char *arg) { json_path = arg; };
@@ -482,6 +484,7 @@ int main(int argc, char *argv[])
 	cbs.add("--enable-validation", [&](CLIParser &) { opts.enable_validation = true; });
 	cbs.add("--graphics-pipeline", [&](CLIParser &parser) { graphics_index = parser.next_uint(); });
 	cbs.add("--compute-pipeline", [&](CLIParser &parser) { compute_index = parser.next_uint(); });
+	cbs.add("--spirv-module", [&](CLIParser &parser) { spirv_index = parser.next_uint(); });
 	cbs.add("--stage", [&](CLIParser &parser) { stage = stage_from_string(parser.next_string()); });
 	cbs.add("--output", [&](CLIParser &parser) { output = parser.next_string(); });
 	cbs.add("--target", [&](CLIParser &parser) {
@@ -505,15 +508,29 @@ int main(int argc, char *argv[])
 	if (compute_index >= 0)
 		stage = VK_SHADER_STAGE_COMPUTE_BIT;
 
-	if (stage == VK_SHADER_STAGE_ALL)
+	if (stage == VK_SHADER_STAGE_ALL && spirv_index < 0)
 	{
 		LOGE("Must choose --stage!\n");
 		return EXIT_FAILURE;
 	}
 
-	if (((graphics_index >= 0 && compute_index >= 0)) || ((graphics_index < 0) && (compute_index < 0)))
+	unsigned arg_count = 0;
+	if (graphics_index >= 0)
+		arg_count++;
+	if (compute_index >= 0)
+		arg_count++;
+	if (spirv_index >= 0)
+		arg_count++;
+
+	if (arg_count > 1)
 	{
-		LOGE("Use either --graphics-pipeline or --compute-pipeline.\n");
+		LOGE("Use either --graphics-pipeline, --compute-pipeline or --spirv-module.\n");
+		return EXIT_FAILURE;
+	}
+
+	if (spirv_index >= 0 && method != DisasmMethod::Asm)
+	{
+		LOGE("Use target asm output when picking specific SPIR-V module.\n");
 		return EXIT_FAILURE;
 	}
 
@@ -592,6 +609,18 @@ int main(int argc, char *argv[])
 
 		auto *module_info = replayer.shader_module_infos[replayer.module_to_index[module]];
 		disassembled = disassemble_spirv(device, replayer.graphics_pipelines[graphics_index], method, stage, module_info, entry);
+	}
+	else if (spirv_index >= 0)
+	{
+		if (size_t(spirv_index) >= replayer.shader_module_infos.size())
+		{
+			LOGE("Used SPIR-V index: %d, but there's only %u SPIR-V modules in the dump.\n",
+			     spirv_index, unsigned(replayer.shader_module_infos.size()));
+			return EXIT_FAILURE;
+		}
+
+		auto *info = replayer.shader_module_infos[spirv_index];
+		disassembled = disassemble_spirv_asm(info);
 	}
 
 	if (output.empty())
