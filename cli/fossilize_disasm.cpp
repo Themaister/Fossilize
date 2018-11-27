@@ -44,8 +44,8 @@ using namespace std;
 using namespace Fossilize;
 struct DisasmReplayer : StateCreatorInterface
 {
-	DisasmReplayer(const VulkanDevice *device)
-		: device(device)
+	DisasmReplayer(const VulkanDevice *device, int graphics_index, int compute_index)
+		: device(device), graphics_index(graphics_index), compute_index(compute_index)
 	{
 		if (device)
 		{
@@ -75,12 +75,11 @@ struct DisasmReplayer : StateCreatorInterface
 			for (auto &render_pass : render_passes)
 				if (render_pass)
 					vkDestroyRenderPass(device->get_device(), render_pass, nullptr);
-			for (auto &pipeline : compute_pipelines)
-				if (pipeline)
-					vkDestroyPipeline(device->get_device(), pipeline, nullptr);
-			for (auto &pipeline : graphics_pipelines)
-				if (pipeline)
-					vkDestroyPipeline(device->get_device(), pipeline, nullptr);
+
+			if (graphics_index >= 0 && graphics_pipelines[graphics_index])
+				vkDestroyPipeline(device->get_device(), graphics_pipelines[graphics_index], nullptr);
+			if (compute_index >= 0 && compute_pipelines[compute_index])
+				vkDestroyPipeline(device->get_device(), compute_pipelines[compute_index], nullptr);
 		}
 	}
 
@@ -240,7 +239,7 @@ struct DisasmReplayer : StateCreatorInterface
 
 	bool enqueue_create_compute_pipeline(Hash, unsigned index, const VkComputePipelineCreateInfo *create_info, VkPipeline *pipeline) override
 	{
-		if (device)
+		if (device && index == unsigned(compute_index))
 		{
 			LOGI("Creating compute pipeline #%u\n", index);
 			if (vkCreateComputePipelines(device->get_device(), pipeline_cache, 1, create_info, nullptr, pipeline) !=
@@ -262,7 +261,7 @@ struct DisasmReplayer : StateCreatorInterface
 
 	bool enqueue_create_graphics_pipeline(Hash, unsigned index, const VkGraphicsPipelineCreateInfo *create_info, VkPipeline *pipeline) override
 	{
-		if (device)
+		if (device && index == unsigned(graphics_index))
 		{
 			LOGI("Creating graphics pipeline #%u\n", index);
 			if (vkCreateGraphicsPipelines(device->get_device(), pipeline_cache, 1, create_info, nullptr, pipeline) !=
@@ -283,6 +282,8 @@ struct DisasmReplayer : StateCreatorInterface
 	}
 
 	const VulkanDevice *device;
+	int graphics_index;
+	int compute_index;
 
 	vector<const VkSamplerCreateInfo *> sampler_infos;
 	vector<const VkDescriptorSetLayoutCreateInfo *> set_layout_infos;
@@ -544,7 +545,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	DisasmReplayer replayer(device.get_device() ? &device : nullptr);
+	DisasmReplayer replayer(device.get_device() ? &device : nullptr, graphics_index, compute_index);
 	StateReplayer state_replayer;
 
 	try
