@@ -428,7 +428,37 @@ static string disassemble_spirv_amd(const VulkanDevice &device, VkPipeline pipel
 		return "";
 	}
 
-	return string(begin(ret), end(ret));
+	VkShaderStatisticsInfoAMD stats;
+	size = sizeof(stats);
+	if (vkGetShaderInfoAMD(device.get_device(), pipeline, stage, VK_SHADER_INFO_TYPE_STATISTICS_AMD, &size, &stats) != VK_SUCCESS)
+	{
+		LOGE("Failed vkGetShaderInfoAMD.\n");
+		return "";
+	}
+
+	auto str = string(begin(ret), end(ret));
+	while (!str.empty() && str.back() == '\0')
+		str.pop_back();
+
+	str += "=== STATISTICS ===\n\n";
+
+	str += "VGPRs: ";
+	str += std::to_string(stats.resourceUsage.numUsedVgprs);
+	str += "\n";
+
+	str += "SGPRs: ";
+	str += std::to_string(stats.resourceUsage.numUsedSgprs);
+	str += "\n";
+
+	str += "Scratch usage (bytes): ";
+	str += std::to_string(stats.resourceUsage.scratchMemUsageInBytes);
+	str += "\n";
+
+	str += "LDS usage (bytes): ";
+	str += std::to_string(stats.resourceUsage.ldsUsageSizeInBytes);
+	str += "\n";
+
+	return str;
 }
 
 static string disassemble_spirv(const VulkanDevice &device, VkPipeline pipeline,
