@@ -76,9 +76,9 @@ struct DisasmReplayer : StateCreatorInterface
 				if (render_pass)
 					vkDestroyRenderPass(device->get_device(), render_pass, nullptr);
 
-			if (graphics_index >= 0 && graphics_pipelines[graphics_index])
+			if (size_t(graphics_index) < graphics_pipelines.size() && graphics_pipelines[graphics_index])
 				vkDestroyPipeline(device->get_device(), graphics_pipelines[graphics_index], nullptr);
-			if (compute_index >= 0 && compute_pipelines[compute_index])
+			if (size_t(compute_index) < compute_pipelines.size() && compute_pipelines[compute_index])
 				vkDestroyPipeline(device->get_device(), compute_pipelines[compute_index], nullptr);
 		}
 	}
