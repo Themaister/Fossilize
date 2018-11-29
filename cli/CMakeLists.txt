@@ -5,6 +5,7 @@ if (NOT WIN32)
 	target_link_libraries(volk dl)
 endif()
 
+set(SPIRV_WERROR OFF CACHE BOOL "Force no Werror")
 set(SPIRV-Headers_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/SPIRV-Headers" CACHE STRING "SPIRV-Headers path")
 set(SHADERC_SKIP_TESTS ON)
 add_subdirectory(SPIRV-Tools EXCLUDE_FROM_ALL)
