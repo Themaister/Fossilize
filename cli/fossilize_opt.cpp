@@ -66,7 +66,7 @@ struct OptimizeReplayer : StateCreatorInterface
 	bool enqueue_create_shader_module(Hash hash, unsigned index, const VkShaderModuleCreateInfo *create_info, VkShaderModule *module) override
 	{
 		vector<uint32_t> compiled_spirv;
-		spvtools::Optimizer optimizer(SPV_ENV_VULKAN_1_0);
+		spvtools::Optimizer optimizer(SPV_ENV_VULKAN_1_1);
 		optimizer.RegisterPerformancePasses();
 		if (!optimizer.Run(create_info->pCode, create_info->codeSize / sizeof(uint32_t), &compiled_spirv))
 			return false;

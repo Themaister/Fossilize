@@ -355,7 +355,7 @@ static VkShaderStageFlagBits stage_from_string(const char *stage)
 static string disassemble_spirv_asm(const VkShaderModuleCreateInfo *create_info)
 {
 	string str;
-	spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_0);
+	spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
 	if (!tools.Disassemble(create_info->pCode, create_info->codeSize / sizeof(uint32_t), &str))
 		return "";
 	return str;
