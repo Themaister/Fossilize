@@ -2037,7 +2037,7 @@ VkGraphicsPipelineCreateInfo StateRecorder::Impl::copy_graphics_pipeline(const V
 
 	if (info.pVertexInputState)
 	{
-		if (info.pColorBlendState->pNext)
+		if (info.pVertexInputState->pNext)
 			FOSSILIZE_THROW("pNext in VkPipelineTessellationStateCreateInfo not supported.");
 		info.pVertexInputState = copy(info.pVertexInputState, 1);
 	}
