@@ -2049,13 +2049,6 @@ VkGraphicsPipelineCreateInfo StateRecorder::Impl::copy_graphics_pipeline(const V
 		info.pMultisampleState = copy(info.pMultisampleState, 1);
 	}
 
-	if (info.pVertexInputState)
-	{
-		if (info.pVertexInputState->pNext)
-			FOSSILIZE_THROW("pNext in VkPipelineVertexInputStateCreateInfo not supported.");
-		info.pVertexInputState = copy(info.pVertexInputState, 1);
-	}
-
 	if (info.pViewportState)
 	{
 		if (info.pViewportState->pNext)
