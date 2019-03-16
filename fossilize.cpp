@@ -1223,7 +1223,7 @@ void StateReplayer::Impl::parse_compute_pipelines(StateCreatorInterface &iface, 
 		auto &info = infos[index];
 		info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 		info.flags = obj["flags"].GetUint();
-		info.basePipelineIndex = obj["basePipelineIndex"].GetUint();
+		info.basePipelineIndex = obj["basePipelineIndex"].GetInt();
 
 		auto pipeline = obj["basePipelineHandle"].GetUint64();
 		if (pipeline > replayed_shader_modules.size())
@@ -1560,7 +1560,7 @@ void StateReplayer::Impl::parse_graphics_pipelines(StateCreatorInterface &iface,
 		auto &info = infos[index];
 		info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		info.flags = obj["flags"].GetUint();
-		info.basePipelineIndex = obj["basePipelineIndex"].GetUint();
+		info.basePipelineIndex = obj["basePipelineIndex"].GetInt();
 
 		auto pipeline = obj["basePipelineHandle"].GetUint64();
 		if (pipeline > replayed_shader_modules.size())
