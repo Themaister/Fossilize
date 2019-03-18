@@ -1223,7 +1223,7 @@ void StateReplayer::Impl::parse_compute_pipelines(StateCreatorInterface &iface, 
 		auto &info = infos[index];
 		info.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 		info.flags = obj["flags"].GetUint();
-		info.basePipelineIndex = obj["basePipelineIndex"].GetUint();
+		info.basePipelineIndex = obj["basePipelineIndex"].GetInt();
 
 		auto pipeline = obj["basePipelineHandle"].GetUint64();
 		if (pipeline > replayed_shader_modules.size())
@@ -1560,7 +1560,7 @@ void StateReplayer::Impl::parse_graphics_pipelines(StateCreatorInterface &iface,
 		auto &info = infos[index];
 		info.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		info.flags = obj["flags"].GetUint();
-		info.basePipelineIndex = obj["basePipelineIndex"].GetUint();
+		info.basePipelineIndex = obj["basePipelineIndex"].GetInt();
 
 		auto pipeline = obj["basePipelineHandle"].GetUint64();
 		if (pipeline > replayed_shader_modules.size())
@@ -2037,7 +2037,7 @@ VkGraphicsPipelineCreateInfo StateRecorder::Impl::copy_graphics_pipeline(const V
 
 	if (info.pVertexInputState)
 	{
-		if (info.pColorBlendState->pNext)
+		if (info.pVertexInputState->pNext)
 			FOSSILIZE_THROW("pNext in VkPipelineTessellationStateCreateInfo not supported.");
 		info.pVertexInputState = copy(info.pVertexInputState, 1);
 	}
@@ -2047,13 +2047,6 @@ VkGraphicsPipelineCreateInfo StateRecorder::Impl::copy_graphics_pipeline(const V
 		if (info.pMultisampleState->pNext)
 			FOSSILIZE_THROW("pNext in VkPipelineMultisampleStateCreateInfo not supported.");
 		info.pMultisampleState = copy(info.pMultisampleState, 1);
-	}
-
-	if (info.pVertexInputState)
-	{
-		if (info.pVertexInputState->pNext)
-			FOSSILIZE_THROW("pNext in VkPipelineVertexInputStateCreateInfo not supported.");
-		info.pVertexInputState = copy(info.pVertexInputState, 1);
 	}
 
 	if (info.pViewportState)
