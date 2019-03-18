@@ -1,5 +1,7 @@
 # Fossilize
 
+**This repository is discontinued, see [new upstream under ValveSoftware/](https://github.com/ValveSoftware/Fossilize) for further development.**
+
 [![Build Status](https://travis-ci.org/Themaister/Fossilize.svg?branch=master)](https://travis-ci.org/Themaister/Fossilize)
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/Themaister/Fossilize?svg=true&branch=master)](https://ci.appveyor.com/project/Themaister/fossilize)
 
